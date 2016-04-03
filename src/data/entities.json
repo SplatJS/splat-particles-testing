@@ -1,0 +1,35 @@
+{
+ "main": [
+  {
+   "id": 0,
+   "name": "camera",
+   "camera": true,
+   "position": {
+    "x": 0,
+    "y": 0
+   },
+   "matchCanvasSize": true
+  },
+  {
+   "id": 1,
+   "name": "particle-fire-spawner",
+   "position": {
+    "x": 300,
+    "y": 300
+   },
+   "size": {
+    "width": 100,
+    "height": 100
+   },
+   "timers":{
+    "fire":{
+      "running": true,
+      "loop": true,
+      "time": 0,
+      "max": 15,
+      "script": "./scripts/particle-fire"
+    }
+  }
+  }
+ ]
+}
