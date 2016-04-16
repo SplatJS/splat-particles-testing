@@ -26,14 +26,14 @@ module.exports = function(entity, game) { // eslint-disable-line no-unused-vars
 
 
 
-function middleCenterX(game, entity) {
-  var position = game.entities.get(entity, "position");
-  var size = game.entities.get(entity, "size");
-  return position.x + (size.width / 2);
-}
+// function middleCenterX(game, entity) {
+//   var position = game.entities.get(entity, "position");
+//   var size = game.entities.get(entity, "size");
+//   return position.x + (size.width / 2);
+// }
 
-function middleCenterY(game, entity) {
-  var position = game.entities.get(entity, "position");
-  var size = game.entities.get(entity, "size");
-  return position.y + (size.height / 2);
-}
+// function middleCenterY(game, entity) {
+//   var position = game.entities.get(entity, "position");
+//   var size = game.entities.get(entity, "size");
+//   return position.y + (size.height / 2);
+// }
