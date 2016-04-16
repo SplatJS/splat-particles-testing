@@ -1,6 +1,6 @@
 "use strict";
 
-var random = require("./random");
+var random = require("splat-ecs/lib/random");
 
 module.exports = {
   /**
