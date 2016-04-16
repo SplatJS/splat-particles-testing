@@ -1,9 +1,7 @@
 "use strict";
 
-var particles = require("../particles");
-
+var particles = require("splat-ecs/lib/particles");
 var fire = new particles.Config("fire");
-
 
 fire.qtyMin = 5;
 fire.qtyMax = 5;
@@ -17,14 +15,9 @@ fire.spreadType = "even";
 //fire.lifeSpan = 500;
 module.exports = function(entity, game) { // eslint-disable-line no-unused-vars
 
-
   fire.origin = entity;
   particles.create(game, fire);
-
-
 };
-
-
 
 // function middleCenterX(game, entity) {
 //   var position = game.entities.get(entity, "position");

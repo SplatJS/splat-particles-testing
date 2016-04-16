@@ -54,7 +54,7 @@
     "main"
    ]
   },{
-   "name": "./systems/simulation/decay-life-span",
+   "name": "splat-ecs/lib/systems/decay-life-span",
    "scenes": [
     "main"
    ]
