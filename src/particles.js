@@ -4,7 +4,9 @@ var random = require("splat-ecs/lib/random");
 
 module.exports = {
   /**
-  * Create between qtyMin and qtyMax prefabs each time function is called.
+  * Create between qtyMin and qtyMax particles, and randomize their properties according to <code>config</config>.
+  * @param {object} game The <code>game</code> object that you get in systems and scripts.
+  * @param {Config} config The settings to use to create the particles.
   */
   "create": function(game, config) {
     var particleCount = Math.floor(random.inRange(config.qtyMin, config.qtyMax));
@@ -68,12 +70,12 @@ module.exports = {
     */
     this.spreadType = "random";
     /**
-    * The angle in radians to move the particles.
+    * The direction (an angle in radians) that the particles should move.
     * @member {number}
     */
     this.angle = 0;
     /**
-    * The angle in radians to spread the particles.
+    * The width of an arc (represented by an angle in radians) to spread the particles. The arc is centered around <code>angle</code>.
     * @member {number}
     */
     this.arcWidth = Math.PI / 2;
@@ -90,7 +92,7 @@ module.exports = {
     /**
     * The minimum percentage to scale each particle.
     * A scale of 0.5 means the particle will spawn at 50% (half) of the original size.
-    * A scale of 1 means the particle will spawn at 100% of the original size.
+    * A scale of 1 means the particle will spawn at the original size.
     * A scale of 2 means the particle will spawn at 200% (double) the original size.
     * @member {number}
     */
@@ -98,38 +100,38 @@ module.exports = {
     /**
     * The maximum percentage to scale each particle.
     * A scale of 0.5 means the particle will spawn at 50% (half) of the original size.
-    * A scale of 1 means the particle will spawn at 100% of the original size.
+    * A scale of 1 means the particle will spawn at the original size.
     * A scale of 2 means the particle will spawn at 200% (double) the original size.
     * @member {number}
     */
     this.sizeMax = 1;
     /**
-    *
+    * The minimum velocity to apply to each particle.
     * @member {number}
     */
     this.velocityMin = 0.5;
     /**
-    *
+    * The maximum velocity to apply to each particle.
     * @member {number}
     */
     this.velocityMax = 0.5;
     /**
-    *
+    * The acceleration on the x-axis to apply to each particle.
     * @member {number}
     */
     this.accelerationX = 0;
     /**
-    *
+    * The acceleration on the y-axis to apply to each particle.
     * @member {number}
     */
     this.accelerationY = 0;
     /**
-    *
+    * The minimum life span to apply to each particle.
     * @member {number}
     */
     this.lifeSpanMin = 0;
     /**
-    *
+    * The maximum life span to apply to each particle.
     * @member {number}
     */
     this.lifeSpanMax = 500;
@@ -146,17 +148,12 @@ function pickAngle(config, particleNumber, particleCount) {
   }
 }
 
-
 function scaleEntityRect(game, entity, scaleFactor) {
   var size = game.entities.get(entity, "size");
   size.width = size.width * scaleFactor;
   size.height = size.height * scaleFactor;
 }
 
-
-/**
-*
-*/
 function pointOnCircle(angle, radius) {
   return {
     "x": (radius * Math.cos(angle)),
@@ -165,15 +162,16 @@ function pointOnCircle(angle, radius) {
 }
 
 /**
-* Centers an entity with a position and size on a given point.
-* game - required for game.entities.get().
-* entity - required id of entity to run function on.
-* point - point object ex:{"x": 50, "y": 50} for the starting point of all particles.
+* Center an entity on a given point.
+* @private
+* @param {object} game Required for game.entities.get().
+* @param {integer} entity The id of entity to center.
+* @param {object} point A point object <code>{"x": 50, "y": 50}</code> on which to center the entity.
 */
 function centerEntityOnPoint(game, entity, point) {
   var size = game.entities.get(entity, "size");
   if (!game.entities.get(entity, "position")) {
-    game.entities.set(entity, "position", { "x": 0,"y": 0 });
+    game.entities.set(entity, "position", { "x": 0, "y": 0 });
   }
   var position = game.entities.get(entity, "position");
   position.x = point.x - (size.width / 2);
@@ -181,10 +179,11 @@ function centerEntityOnPoint(game, entity, point) {
 }
 
 /**
-* Chooses a random point inside the bounding rectangle of an entity with position and size.
-* game - required for game.entities.get().
-* entity - required id of entity to run function on.
-* returns an object ex: {"x": 50, "y": 50}
+* Choose a random point inside the bounding rectangle of an entity.
+* @private
+* @param {object} game Required for game.entities.get().
+* @param {integer} entity The id of entity to pick a point within.
+* @returns {object} an point object <code>{"x": 50, "y": 50}</code>.
 */
 function choosePointInEntity(game, entity) {
   var position = game.entities.get(entity, "position");
