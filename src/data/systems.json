@@ -54,7 +54,7 @@
     "main"
    ]
   },{
-   "name": "./systems/simulation/decay",
+   "name": "./systems/simulation/decay-life-span",
    "scenes": [
     "main"
    ]
