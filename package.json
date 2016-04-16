@@ -37,6 +37,7 @@
     "webpack-dev-server": "^1.14.0"
   },
   "dependencies": {
-    "splat-ecs": "5.1.2"
+    "splat-ecs": "5.2",
+    "text-to-speech-js": "^1.1.1"
   }
 }

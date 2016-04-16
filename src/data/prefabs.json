@@ -4,8 +4,7 @@
       "width": 12,
       "height": 12
     },
-    "image":{
-      "name": "fire.png"
-    }
+  
+    "lifeSpanFade": true
   }
 }

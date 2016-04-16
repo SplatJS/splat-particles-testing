@@ -2,23 +2,23 @@
 
 var particles = require("../particles");
 
+var fire = new particles.Config("fire");
+
+
+fire.qtyMin = 5;
+fire.qtyMax = 5;
+fire.spreadType = "even";
+// fire.angle = Math.PI;
+//fire.arcWidth = Math.PI * 2;
+// fire.sizeMin = 0.5;
+// fire.sizeMax = 5;
+// fire.velocityMin = 0.9;
+// fire.velocityMax = 0.5;
+//fire.lifeSpan = 500;
 module.exports = function(entity, game) { // eslint-disable-line no-unused-vars
 
-  var fire = new particles.Config();
-  fire.origin = {
-    "x": middleCenterX(game, entity),
-    "y": middleCenterY(game, entity)
-  };
-  fire.prefab = "fire";
-  fire.qtyMin = 0;
-  fire.qtyMax = 12;
-  //fire.angle =  Math.PI / 2;
-  fire.arcWidth = Math.PI  / 8;
-  fire.sizeMin = 0.5;
-  fire.sizeMax = 2;
-  fire.velocityMin = 0.9;
-  fire.velocityMax = 0.5;
-  //fire.lifeSpan = 500;
+
+  fire.origin = entity;
   particles.create(game, fire);
 
 

@@ -1,30 +1,11 @@
 "use strict";
 
 var random = require("./random");
-/**
-* Create bewtween qtyMin and qtyMax prefabs each time function is called.
-* game - pass the game in
-* origin - point OR entity
-*          point behaviour: object ex: {"x": 50, "y": 50} for the starting point of all particles
-*          entity behaviour: particles will spawn randomly all over the bounding rectangle created by the entity's position and size.
-* prefab - string name of a prefab in prefabs.json
-* spreadtype - string "even" or "random" for particle distribution
-* angle - radian angle to point the particles (between -Math.PI and Math.PI)
-* arcWidth - radian angle to spread the particles (between -Math.PI and Math.PI)
-* qtyMin - Minimum number of particles per call
-* qtyMax - Maximum number of particles per call
-* sizeMin -
-* sizemax -
-* velocityMin - Minimum distance from particle origin to spawn partice
-* velocityMax - Maximum distance from particle origin to spawn partice
-* accelerationX -
-* accelerationY -
-* decayRunning -
-* lifeSpanMin -
-* lifeSpan -
-* lifeSpanFade -
-*/
+
 module.exports = {
+  /**
+  * Create between qtyMin and qtyMax prefabs each time function is called.
+  */
   "create": function(game, config) {
     var particleCount = Math.floor(random.inRange(config.qtyMin, config.qtyMax));
     for (var i = 0; i < particleCount; i++) {
@@ -34,61 +15,136 @@ module.exports = {
       if (typeof config.origin === "number") {
         origin = choosePointInEntity(game, origin);
       }
-      if (config.sizeMax !== 1) {
-        var randomSize = random.inRange(config.sizeMin, config.sizeMax);
-        scaleEntityRect(game, particle, randomSize);
-      }
+
+      var randomSize = random.inRange(config.sizeMin, config.sizeMax);
+      scaleEntityRect(game, particle, randomSize);
+
       centerEntityOnPoint(game, particle, origin);
 
       var velocity = random.inRange(config.velocityMin, config.velocityMax);
 
-      var startAngle = config.angle - (config.arcWidth / 2);
-      var angle = startAngle;
-      if (config.spreadtype === "even") {
-        angle = (i * (config.arcWidth / (particleCount - 1))) + startAngle;
-      } else {
-        var endAngle = startAngle + config.arcWidth;
-        angle = random.inRange(startAngle, endAngle);
-      }
-
+      var angle = pickAngle(config, i, particleCount);
       game.entities.set(particle, "velocity", pointOnCircle(angle, velocity));
 
-      if (config.lifeSpanFade) {
-        game.entities.set(particle, "decay-fade", true);
-      }
       if (config.accelerationX || config.accelerationY) {
         game.entities.set(particle, "acceleration", {
           "x": config.accelerationX,
           "y": config.accelerationY
         });
       }
-      game.entities.set(particle, "decay",{
-        "running": config.decayRunning,
-        "time": config.lifeSpanMin,
-        "max": config.lifeSpan
+      game.entities.set(particle, "lifeSpan", {
+        "current": 0,
+        "max": random.inRange(config.lifeSpanMin, config.lifeSpanMax)
       });
     }
   },
-  "Config": function(origin, prefab, spreadtype, angle, arcWidth, qtyMin, qtyMax, sizeMin, sizeMax, velocityMin, velocityMax, accelerationX, accelerationY, decayRunning, lifeSpanMin, lifeSpan, lifeSpanFade) {
-    this.origin = origin || { "x": 0, "y": 0 };
-    this.prefab = prefab || undefined;
-    this.spreadtype = spreadtype || "random";
-    this.angle = angle || 0;
-    this.arcWidth = arcWidth || Math.PI / 2;
-    this.qtyMin = qtyMin || 1;
-    this.qtyMax = qtyMax || 1;
-    this.sizeMin = sizeMin || 1;
-    this.sizeMax = sizeMax || 1;
-    this.velocityMin = velocityMin || 0.5;
-    this.velocityMax = velocityMax || 0.5;
-    this.accelerationX = accelerationX || 0;
-    this.accelerationY = accelerationY || 0;
-    this.decayRunning = decayRunning || true;
-    this.lifeSpanMin = lifeSpanMin || 0;
-    this.lifeSpan = lifeSpan || 500;
-    this.lifeSpanFade = lifeSpanFade || false;
+
+  /**
+  * The settings for a type of particle.
+  * @constructor
+  * @param {string} prefab The name of a prefab to instantiate for the particle, as defined in `prefabs.json`.
+  */
+  "Config": function(prefab) {
+    /**
+    * The name of a prefab to instantiate for the particle, as defined in `prefabs.json`.
+    * @member {string}
+    */
+    this.prefab = prefab;
+    /**
+    * The origin point in which to create particles.
+    *
+    * If the origin is a number it represents an entity and a random point inside the entity will be used.
+    * If origin is a point like <code>{"x": 50, "y": 50}</code> particles will spawn at that position.
+    * @member {object | number}
+    */
+    this.origin = { "x": 0, "y": 0 };
+    /**
+    * How to distribute particles along the {@link Config#arcWidth}.
+    *
+    * Possible values:
+    * <code>"even"</code> - Distribute the particles evenly along the arc.
+    * <code>"random"</code> - Scatter the particles on random points of the arc.
+    * @member {string}
+    */
+    this.spreadType = "random";
+    /**
+    * The angle in radians to move the particles.
+    * @member {number}
+    */
+    this.angle = 0;
+    /**
+    * The angle in radians to spread the particles.
+    * @member {number}
+    */
+    this.arcWidth = Math.PI / 2;
+    /**
+    * The minimum number of particles to create.
+    * @member {number}
+    */
+    this.qtyMin = 1;
+    /**
+    * The maximum number of particles to create.
+    * @member {number}
+    */
+    this.qtyMax = 1;
+    /**
+    * The minimum percentage to scale each particle.
+    * A scale of 0.5 means the particle will spawn at 50% (half) of the original size.
+    * A scale of 1 means the particle will spawn at 100% of the original size.
+    * A scale of 2 means the particle will spawn at 200% (double) the original size.
+    * @member {number}
+    */
+    this.sizeMin = 1;
+    /**
+    * The maximum percentage to scale each particle.
+    * A scale of 0.5 means the particle will spawn at 50% (half) of the original size.
+    * A scale of 1 means the particle will spawn at 100% of the original size.
+    * A scale of 2 means the particle will spawn at 200% (double) the original size.
+    * @member {number}
+    */
+    this.sizeMax = 1;
+    /**
+    *
+    * @member {number}
+    */
+    this.velocityMin = 0.5;
+    /**
+    *
+    * @member {number}
+    */
+    this.velocityMax = 0.5;
+    /**
+    *
+    * @member {number}
+    */
+    this.accelerationX = 0;
+    /**
+    *
+    * @member {number}
+    */
+    this.accelerationY = 0;
+    /**
+    *
+    * @member {number}
+    */
+    this.lifeSpanMin = 0;
+    /**
+    *
+    * @member {number}
+    */
+    this.lifeSpanMax = 500;
   }
 };
+
+function pickAngle(config, particleNumber, particleCount) {
+  var startAngle = config.angle - (config.arcWidth / 2);
+  if (config.spreadType === "even") {
+    return (particleNumber * (config.arcWidth / (particleCount - 1))) + startAngle;
+  } else {
+    var endAngle = startAngle + config.arcWidth;
+    return random.inRange(startAngle, endAngle);
+  }
+}
 
 
 function scaleEntityRect(game, entity, scaleFactor) {
@@ -116,10 +172,12 @@ function pointOnCircle(angle, radius) {
 */
 function centerEntityOnPoint(game, entity, point) {
   var size = game.entities.get(entity, "size");
-  game.entities.set(entity, "position",{
-    "x": point.x - (size.width / 2),
-    "y": point.y - (size.height / 2)
-  });
+  if (!game.entities.get(entity, "position")) {
+    game.entities.set(entity, "position", { "x": 0,"y": 0 });
+  }
+  var position = game.entities.get(entity, "position");
+  position.x = point.x - (size.width / 2);
+  position.y = point.y - (size.height / 2);
 }
 
 /**
@@ -131,6 +189,12 @@ function centerEntityOnPoint(game, entity, point) {
 function choosePointInEntity(game, entity) {
   var position = game.entities.get(entity, "position");
   var size = game.entities.get(entity, "size");
+  if (size === undefined) {
+    return {
+      "x": position.x,
+      "y": position.y
+    };
+  }
   return {
     "x": random.inRange(position.x, (position.x + size.width)),
     "y": random.inRange(position.y, (position.y + size.height))
